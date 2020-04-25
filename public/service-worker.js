@@ -15,31 +15,97 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-'use strict';
+"use strict";
 
 // CODELAB: Update cache names any time any of the cached files change.
-const CACHE_NAME = 'static-cache-v1';
+const CACHE_NAME = "static-cache-v2";
+const DATA_CACHE_NAME = "data-cache-v1";
 
 // CODELAB: Add list of files to cache here.
 const FILES_TO_CACHE = [
+  "/",
+  "/index.html",
+  "/scripts/app.js",
+  "/scripts/install.js",
+  "/scripts/luxon-1.11.4.js",
+  "/styles/inline.css",
+  "/images/add.svg",
+  "/images/01d.png",
+  "/images/01n.png",
+  "/images/02d.png",
+  "/images/02n.png",
+  "/images/03d.png",
+  "/images/04n.png",
+  "/images/09d.png",
+  "/images/09n.png",
+  "/images/10d.png",
+  "/images/10n.png",
+  "/images/11d.png",
+  "/images/11n.png",
+  "/images/13d.png",
+  "/images/13n.png",
+  "/images/50d.png",
+  "/images/50n.png",
+  "/images/refresh.svg",
 ];
 
-self.addEventListener('install', (evt) => {
-  console.log('[ServiceWorker] Install');
+self.addEventListener("install", (evt) => {
+  console.log("[ServiceWorker] Install");
   // CODELAB: Precache static resources here.
-
+  evt.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log("[ServiceWorker] Pre-caching offline page");
+      return cache.addAll(FILES_TO_CACHE);
+    })
+  );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (evt) => {
-  console.log('[ServiceWorker] Activate');
+self.addEventListener("activate", (evt) => {
+  console.log("[ServiceWorker] Activate");
   // CODELAB: Remove previous cached data from disk.
+  evt.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(
+        keyList.map((key) => {
+          if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+            console.log("[ServiceWorker] Removing old cache", key);
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
 
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (evt) => {
-  console.log('[ServiceWorker] Fetch', evt.request.url);
+self.addEventListener("fetch", (evt) => {
+  console.log("[ServiceWorker] Fetch", evt.request.url);
   // CODELAB: Add fetch event handler here.
-
+  if (evt.request.url.includes("/forecast/")) {
+    console.log("[Service Worker] Fetch (data)", evt.request.url);
+    evt.respondWith(
+      caches.open(DATA_CACHE_NAME).then((cache) => {
+        return fetch(evt.request)
+          .then((response) => {
+            if (response.status === 200) {
+              cache.put(evt.request.url, response.clone());
+            }
+            return response;
+          })
+          .catch((err) => {
+            return cache.match(evt.request);
+          });
+      })
+    );
+    return;
+  }
+  evt.respondWith(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(evt.request).then((response) => {
+        return response || fetch(evt.request);
+      });
+    })
+  );
 });
