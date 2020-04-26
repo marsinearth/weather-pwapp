@@ -19,6 +19,7 @@
 "use strict";
 require("dotenv").config();
 const express = require("express");
+const serverless = require("serverless-http");
 const Bundler = require("parcel-bundler");
 const fetch = require("node-fetch");
 const redirectToHTTPS = require("express-http-to-https").redirectToHTTPS;
@@ -243,37 +244,31 @@ function getForecast(req, resp) {
  *
  * @return {ExpressServer} instance of the Express server.
  */
-function startServer() {
-  const app = express();
-  const bundler = new Bundler("public/index.html");
 
-  // Redirect HTTP to HTTPS,
-  app.use(redirectToHTTPS([/localhost:(\d{4})/], [], 301));
+const app = express();
+const bundler = new Bundler("public/index.html");
 
-  // Logging for each request
-  app.use((req, resp, next) => {
-    const now = new Date();
-    const time = `${now.toLocaleDateString()} - ${now.toLocaleTimeString()}`;
-    const path = `"${req.method} ${req.path}"`;
-    const m = `${req.ip} - ${time} - ${path}`;
-    // eslint-disable-next-line no-console
-    console.log(m);
-    next();
-  });
+// Redirect HTTP to HTTPS,
+app.use(redirectToHTTPS([/localhost:(\d{4})/], [], 301));
 
-  // Handle requests for the data
-  app.get("/forecast/:location", getForecast);
-  app.get("/forecast/", getForecast);
-  app.get("/forecast", getForecast);
+// Logging for each request
+app.use((req, resp, next) => {
+  const now = new Date();
+  const time = `${now.toLocaleDateString()} - ${now.toLocaleTimeString()}`;
+  const path = `"${req.method} ${req.path}"`;
+  const m = `${req.ip} - ${time} - ${path}`;
+  // eslint-disable-next-line no-console
+  console.log(m);
+  next();
+});
 
-  // Handle requests for static files
-  app.use(express.static("public"));
-  app.use(bundler.middleware());
-  // Start the server
-  return app.listen("8000", () => {
-    // eslint-disable-next-line no-console
-    console.log("Local DevServer Started on port 8000...");
-  });
-}
+// Handle requests for the data
+app.get("/forecast/:location", getForecast);
+app.get("/forecast/", getForecast);
+app.get("/forecast", getForecast);
 
-startServer();
+// Handle requests for static files
+app.use(express.static("public"));
+app.use(bundler.middleware());
+// Start the server
+module.exports.handler = serverless(app);

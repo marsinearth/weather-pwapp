@@ -13,7 +13,8 @@
     "dotenv": "^8.2.0",
     "express": "^4.16.4",
     "express-http-to-https": "^1.1.4",
-    "node-fetch": "^2.3.0"
+    "node-fetch": "^2.3.0",
+    "serverless-http": "^2.3.2"
   },
   "engines": {
     "node": "8.x"
