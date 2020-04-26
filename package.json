@@ -5,7 +5,9 @@
   "homepage": "https://codelabs.developers.google.com/codelabs/your-first-pwapp/",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "clean": "rm dist/bundle.js",
+    "start": "node server.js",
+    "build": "parcel build public/index.html"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
@@ -28,5 +30,15 @@
     "progressive-web-app",
     "pwa",
     "installable web app"
-  ]
+  ],
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-sw-cache": "^0.3.1"
+  },
+  "cache": {
+    "disablePlugin": false,
+    "inDev": false,
+    "strategy": "default",
+    "clearDist": true
+  }
 }

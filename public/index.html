@@ -28,7 +28,7 @@
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
 
     <!-- CODELAB: Add link rel manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <!-- CODELAB: Add iOS meta tags and icons -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -43,8 +43,8 @@
     <header class="header">
       <h1>
         Weather PWA
-        <a href="https://darksky.net/poweredby/" class="powered-by">
-          Powered by Dark Sky
+        <a href="https://openweathermap.org/api" class="powered-by">
+          Powered by Open Weather Map
         </a>
       </h1>
       <button id="butInstall" aria-label="Install" hidden></button>
@@ -191,7 +191,9 @@
       // CODELAB: Register service worker.
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/service-worker.js").then((reg) => {
+          // to avoid parcel-bundler
+          const swName = "/sw.js";
+          navigator.serviceWorker.register(swName).then((reg) => {
             console.log("Service worker registered.", reg);
           });
         });
