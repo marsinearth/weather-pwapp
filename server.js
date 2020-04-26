@@ -19,6 +19,7 @@
 "use strict";
 require("dotenv").config();
 const express = require("express");
+const Bundler = require("parcel-bundler");
 const fetch = require("node-fetch");
 const redirectToHTTPS = require("express-http-to-https").redirectToHTTPS;
 
@@ -244,6 +245,7 @@ function getForecast(req, resp) {
  */
 function startServer() {
   const app = express();
+  const bundler = new Bundler("public/index.html");
 
   // Redirect HTTP to HTTPS,
   app.use(redirectToHTTPS([/localhost:(\d{4})/], [], 301));
@@ -266,7 +268,7 @@ function startServer() {
 
   // Handle requests for static files
   app.use(express.static("public"));
-
+  app.use(bundler.middleware());
   // Start the server
   return app.listen("8000", () => {
     // eslint-disable-next-line no-console

@@ -3,6 +3,7 @@
 > 이 레포는 [구글의 CodeLab PWA강좌](https://codelabs.developers.google.com/codelabs/your-first-pwapp/#0)용 레포입니다.
 > 원래 쓰이던 [Dark Sky Api](https://darksky.net/dev)가 Apple에 합류하게 되면서 회원가입을 받지 않아,
 > 비슷한 구조의 무료인 [Open Weather Map](https://openweathermap.org/) 의 [One Call Api](https://openweathermap.org/api/one-call-api)로 변경한 버전입니다. (관련 아이콘들도 다 변경하였습니다.)
+> [Demo에서 확인](https://your-first-pwa.netlify.app/)
 
 These are the resource files needed for the
 [Your First Progressive Web App][codelab] codelab.
