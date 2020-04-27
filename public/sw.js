@@ -35,6 +35,7 @@ const FILES_TO_CACHE = [
   "/images/02d.png",
   "/images/02n.png",
   "/images/03d.png",
+  "/images/04d.png",
   "/images/04n.png",
   "/images/09d.png",
   "/images/09n.png",
