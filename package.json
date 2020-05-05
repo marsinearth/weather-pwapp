@@ -7,14 +7,17 @@
   "scripts": {
     "clean": "rm dist/bundle.js",
     "start": "node server.js",
-    "build": "parcel build public/index.html"
+    "site:build": "parcel build public/index.html --public-url ./",
+    "build": "npm run site:build && npm run lambda:build",
+    "lambda:build": "netlify-lambda build public/lambda"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.16.4",
     "express-http-to-https": "^1.1.4",
-    "node-fetch": "^2.3.0",
-    "serverless-http": "^2.3.2"
+    "http-proxy-middleware": "^1.0.3",
+    "netlify-lambda": "^1.6.3",
+    "node-fetch": "^2.3.0"
   },
   "engines": {
     "node": "8.x"

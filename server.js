@@ -19,225 +19,10 @@
 "use strict";
 require("dotenv").config();
 const express = require("express");
-const serverless = require("serverless-http");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 const Bundler = require("parcel-bundler");
-const fetch = require("node-fetch");
+
 const redirectToHTTPS = require("express-http-to-https").redirectToHTTPS;
-
-// CODELAB: Change this to add a delay (ms) before the server responds.
-const FORECAST_DELAY = 0;
-
-// CODELAB: If running locally, set your Dark Sky API key here
-const API_KEY = process.env.OPEN_WEATHER_MAP_API_KEY;
-const BASE_URL = `https://api.openweathermap.org/data/2.5/onecall?appid=${API_KEY}&units=metric&lang=kr`;
-
-// Fake forecast data used if we can't reach the Dark Sky API
-const fakeForecast = {
-  fakeData: true,
-  lat: 37.7793,
-  lon: -122.4193,
-  timezone: "America/Chicago",
-  current: {
-    dt: 1586001851,
-    sunrise: 1586003020,
-    sunset: 1586048382,
-    temp: 30.15,
-    feels_like: 277.75,
-    pressure: 1017,
-    humidity: 93,
-    uvi: 9.63,
-    clouds: 90,
-    visibility: 6437,
-    wind_speed: 2.1,
-    wind_deg: 70,
-    weather: [
-      {
-        id: 501,
-        main: "Rain",
-        description: "moderate rain",
-        icon: "10n",
-      },
-      {
-        id: 701,
-        main: "Mist",
-        description: "mist",
-        icon: "50n",
-      },
-    ],
-    rain: {
-      "1h": 1.02,
-    },
-  },
-  daily: [
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-    {
-      dt: 1570258800,
-      sunrise: 1570284513,
-      sunset: 1570326446,
-      temp: {
-        max: 52.91,
-        min: 41.35,
-      },
-      weather: {
-        description: "partly-cloudy-night",
-        icon: "02n",
-      },
-      humidity: 69,
-      speed: 1.822,
-      deg: 329,
-    },
-  ],
-};
-
-/**
- * Generates a fake forecast in case the weather API is not available.
- *
- * @param {String} location GPS location to use.
- * @return {Object} forecast object.
- */
-function generateFakeForecast() {
-  // Create a new copy of the forecast
-  const result = Object.assign({}, fakeForecast);
-  return result;
-}
-
-/**
- * Gets the weather forecast from the Dark Sky API for the given location.
- *
- * @param {Request} req request object from Express.
- * @param {Response} resp response object from Express.
- */
-function getForecast(req, resp) {
-  const location = req.params.location || "&lat=40.7720232&lon=-73.9732319";
-  const url = `${BASE_URL}${location}`;
-  fetch(url)
-    .then((resp) => {
-      if (resp.status !== 200) {
-        throw new Error(resp.statusText);
-      }
-      return resp.json();
-    })
-    .then((data) => {
-      setTimeout(() => {
-        resp.json(data);
-      }, FORECAST_DELAY);
-    })
-    .catch((err) => {
-      console.error("Open Weather Map API Error:", err.message);
-      resp.json(generateFakeForecast());
-    });
-}
 
 /**
  * Starts the Express server.
@@ -246,7 +31,7 @@ function getForecast(req, resp) {
  */
 
 const app = express();
-const bundler = new Bundler("public/index.html");
+const bundler = new Bundler("public/index.html", { cache: false });
 
 // Redirect HTTP to HTTPS,
 app.use(redirectToHTTPS([/localhost:(\d{4})/], [], 301));
@@ -263,12 +48,20 @@ app.use((req, resp, next) => {
 });
 
 // Handle requests for the data
-app.get("/forecast/:location", getForecast);
-app.get("/forecast/", getForecast);
-app.get("/forecast", getForecast);
+// app.get("/forecast/:location", getForecast);
+// app.get("/forecast/", getForecast);
+// app.get("/forecast", getForecast);
+
+app.use(
+  "/forecast",
+  createProxyMiddleware({
+    target: "https://your-first-pwa.netlify.app",
+    changeOrigin: true,
+  })
+);
 
 // Handle requests for static files
 app.use(express.static("public"));
 app.use(bundler.middleware());
 // Start the server
-module.exports.handler = serverless(app);
+app.listen(Number(process.env.PORT || 1234));
