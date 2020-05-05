@@ -17,7 +17,6 @@
  * limitations under the License
  */
 "use strict";
-require("dotenv").config();
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const Bundler = require("parcel-bundler");
@@ -48,15 +47,14 @@ app.use((req, resp, next) => {
 });
 
 // Handle requests for the data
-// app.get("/forecast/:location", getForecast);
-// app.get("/forecast/", getForecast);
-// app.get("/forecast", getForecast);
-
 app.use(
-  "/forecast",
+  "/.netlify/functions",
   createProxyMiddleware({
-    target: "https://your-first-pwa.netlify.app",
+    target: "http://localhost:9000",
     changeOrigin: true,
+    pathRewrite: {
+      "^/.netlify/functions": "",
+    },
   })
 );
 

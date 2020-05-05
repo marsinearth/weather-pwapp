@@ -1,10 +1,11 @@
 import fetch from "node-fetch";
+require("dotenv").config();
 // CODELAB: If running locally, set your Dark Sky API key here
 const API_KEY = process.env.OPEN_WEATHER_MAP_API_KEY;
 const BASE_URL = `https://api.openweathermap.org/data/2.5/onecall?appid=${API_KEY}&units=metric&lang=kr`;
 
 // CODELAB: Change this to add a delay (ms) before the server responds.
-const FORECAST_DELAY = 0;
+// const FORECAST_DELAY = 0;
 
 // Fake forecast data used if we can't reach the Dark Sky API
 const fakeForecast = {
@@ -193,30 +194,29 @@ function generateFakeForecast() {
  * @param {Request} req request object from Express.
  * @param {Response} resp response object from Express.
  */
-export function handler(event, context) {
-  const location =
-    event.queryStringParameters || "&lat=40.7720232&lon=-73.9732319";
+export async function handler(event, context) {
+  const location = event.path
+    ? event.path.split("/").pop()
+    : "&lat=40.7720232&lon=-73.9732319";
   const url = `${BASE_URL}${location}`;
-  fetch(url, { headers: { Accept: "application/json" } })
-    .then((resp) => {
+  console.log({ url });
+  try {
+    const data = await fetch(url).then((resp) => {
       if (resp.status !== 200) {
         throw new Error(resp.statusText);
       }
       return resp.json();
-    })
-    .then((data) => {
-      setTimeout(() => {
-        return {
-          statusCode: data.status,
-          body: data,
-        };
-      }, FORECAST_DELAY);
-    })
-    .catch((err) => {
-      console.error("Open Weather Map API Error:", err.message);
-      return {
-        statusCode: 200,
-        body: generateFakeForecast(),
-      };
     });
+
+    return {
+      statusCode: data.status,
+      body: JSON.stringify(data),
+    };
+  } catch (err) {
+    console.error("Open Weather Map API Error:", err.message, { url });
+    return {
+      statusCode: 200,
+      body: JSON.stringify(generateFakeForecast()),
+    };
+  }
 }

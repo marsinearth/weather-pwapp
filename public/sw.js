@@ -27,7 +27,7 @@ const FILES_TO_CACHE = [
   "/index.html",
   "/scripts/app.js",
   "/scripts/install.js",
-  "/scripts/luxon-1.11.4.js",
+  "/scripts/luxon-1.24.1.js",
   "/styles/inline.css",
   "/images/add.svg",
   "/images/01d.png",

@@ -15,7 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-"use strict";
+
+import { DateTime } from "./luxon-1.24.1.js";
+
+("use strict");
 
 const weatherApp = {
   selectedLocations: {},
@@ -98,7 +101,7 @@ function renderForecast(card, data) {
   // Render the forecast data into the card.
   card.querySelector(".description").textContent =
     data.current.weather[0].description;
-  const forecastFrom = luxon.DateTime.fromSeconds(data.current.dt)
+  const forecastFrom = DateTime.fromSeconds(data.current.dt)
     .setZone(data.timezone)
     .toFormat("DDDD t");
   card.querySelector(".date").textContent = forecastFrom;
@@ -118,11 +121,11 @@ function renderForecast(card, data) {
   card.querySelector(".current .wind .direction").textContent = Math.round(
     data.current.wind_deg
   );
-  const sunrise = luxon.DateTime.fromSeconds(data.current.sunrise)
+  const sunrise = DateTime.fromSeconds(data.current.sunrise)
     .setZone(data.timezone)
     .toFormat("t");
   card.querySelector(".current .sunrise .value").textContent = sunrise;
-  const sunset = luxon.DateTime.fromSeconds(data.current.sunset)
+  const sunset = DateTime.fromSeconds(data.current.sunset)
     .setZone(data.timezone)
     .toFormat("t");
   card.querySelector(".current .sunset .value").textContent = sunset;
@@ -131,7 +134,7 @@ function renderForecast(card, data) {
   const futureTiles = card.querySelectorAll(".future .oneday");
   futureTiles.forEach((tile, index) => {
     const forecast = data.daily[index + 1];
-    const forecastFor = luxon.DateTime.fromSeconds(forecast.dt)
+    const forecastFor = DateTime.fromSeconds(forecast.dt)
       .setZone(data.timezone)
       .toFormat("ccc");
     tile.querySelector(".date").textContent = forecastFor;
@@ -165,11 +168,12 @@ function renderForecast(card, data) {
  * @return {Object} The weather forecast, if the request fails, return null.
  */
 function getForecastFromNetwork(coords) {
-  return fetch(`/forecast/${coords}`)
+  return fetch(`/.netlify/functions/forecast/${coords}`)
     .then((response) => {
       return response.json();
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error({ err });
       return null;
     });
 }
@@ -185,7 +189,7 @@ function getForecastFromCache(coords) {
   if (!("caches" in window)) {
     return null;
   }
-  const url = `${window.location.origin}/forecast/${coords}`;
+  const url = `${window.location.origin}/.netlify/functions/forecast/${coords}`;
   return caches
     .match(url)
     .then((response) => {
