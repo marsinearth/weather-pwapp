@@ -46,6 +46,27 @@
     "disablePlugin": false,
     "inDev": false,
     "strategy": "default",
-    "clearDist": true
+    "clearDist": true,
+    "globDirectory": "dist",
+    "globPatterns": [
+      "**/*.{html,js,css,jpg,png,gif,svg,eot,ttf,woff,woff2,webmanifest}"
+    ],
+    "swDest": "sw.js",
+    "navigateFallback": "public/index.html",
+    "clientsClaim": true,
+    "skipWaiting": true,
+    "templatedURLs": {
+      "/": [
+        "index.html"
+      ]
+    },
+    "runtimeCaching": [
+      {
+        "urlPattern": [
+          "/forecast/"
+        ],
+        "handler": "networkFirst"
+      }
+    ]
   }
 }
